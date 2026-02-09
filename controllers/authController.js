@@ -35,6 +35,8 @@ module.exports.signupUserController = asyncHandler(async (req, res) => {
         password : hashPs,
     })
     await user.save();
+    
+    //TODO sending email to verif acc
 
     //send res to client
     res.status(201).json({message : "You register pls log in!!"})
@@ -66,7 +68,7 @@ module.exports.loginUserController = asyncHandler(async (req, res) => {
     if(isPassword){
         return res.status(400).json({message : "user not exist"})
     }
-    
+
     //TODO sending email to verif acc
 
     //generate token
