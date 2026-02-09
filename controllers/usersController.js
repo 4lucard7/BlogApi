@@ -1,8 +1,9 @@
 const asyncHandler = require("express-async-handler");
 const { User, validateUpdateUser } = require("../models/User");
 const bcrypt = require("bcrypt");
-
-
+const path = require("path");
+const { cloudinaryUploadImage, cloudinaryDeleteImage } = require("../utils/cloudinary");
+const fs = require("fs")
 
 
 /**
@@ -69,7 +70,7 @@ const updateUser = asyncHandler(async(req, res) => {
 /**
  * @description get User count
  * @route /api/users/count
- * @method get
+ * @method getdata
  * @access private (only admin)
  */
 const getUsersCount = asyncHandler(async (req, res) => {
@@ -77,8 +78,44 @@ const getUsersCount = asyncHandler(async (req, res) => {
     res.status(200).json({ count });
 });
 
+/**
+ * @description  profile photo upload
+ * @route /api/users/profiles/profile-photo-upload
+ * @method post
+ * @access private (only admin)
+ */ 
+const profilePhotoUpload = asyncHandler(async(req, res) => {
+    //validatiion
+    if(req.file){
+        return res.status(400).json({message : "not file"})
+    }
+    //get the path 
+    const imagePath = path.join(__dirname, `../images/${req.file.filename}`)
+    
+    //upload to cloudinary
+    const result = await cloudinaryUploadImage(imagePath);
 
+    //get user from db
+    const user = await User.findById(req.user.id);
 
+    //delete the old profile photo if exist
+    if(user.profilePhoto.publicId !== null){
+        await cloudinaryDeleteImage(user.profilePhoto.publicId)
+    }
+
+    //change the profilePhoto filed in the db
+    user.profilePhoto = {
+        url : result.secure_url,
+        publicId : result.public_id,
+    }
+    await user.save();
+
+    //res to the clients
+    res.status(200).json({message : "Your profile photo upload sucessfuly", profilePhoto : {url : result.secure_url, publicId : result.public_id}})
+
+    //Remove image from the server
+    fs.unlinkSync(path.join(imagePath));
+})
 
 
 
@@ -99,6 +136,7 @@ module.exports = {
     getAllUsers,
     getUser,
     updateUser,
-    getUsersCount
+    getUsersCount,
+    profilePhotoUpload
     
 }
