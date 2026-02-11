@@ -5,10 +5,10 @@ const multer = require("multer");
 
 //photo Storage
 const photoStorage = multer.diskStorage({
-    destination : (req, File, cb) =>{
+    destination : (req, file, cb) =>{
         cb(null, path.join(__dirname, "../images"))
     },
-    filename : (req, res, cb)=>{
+    filename : (req, file, cb)=>{
         if(file){
             cb(null, new Date().toString().replace(/:/g,"-") + file.originalname);
         }else{
