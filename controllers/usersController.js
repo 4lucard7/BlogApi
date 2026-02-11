@@ -118,7 +118,36 @@ const profilePhotoUpload = asyncHandler(async(req, res) => {
 })
 
 
+/**
+ * @description  profile photo delete(account)
+ * @route /api/users/profiles/:id
+ * @method post
+ * @access private (only admin or user)
+ */ 
+const profilePhotodelete = asyncHandler(async(req, res) => {
 
+    //get the user from db
+    const user = await User.findById(req.params.id);
+    if(!user){
+        return res.status(404).json({ message : "user not found"})
+    }
+
+    //TODO get all posts from db
+    //TODO get then public is from the psot
+    //TODO delete all posts img from cloudinary 
+
+    // elete the profile pict from cloudinary
+    await cloudinaryDeleteImage(user.profilePhoto.publicId)
+    //TODO delete user post and comments
+
+    //delete user himself
+    await User.findByIdAndDelete(req.params.id);
+
+    //res to the clients
+    res.status(200).json({message : "Your profile photo has been deleted"})
+
+   
+})
 
 
 
@@ -137,6 +166,7 @@ module.exports = {
     getUser,
     updateUser,
     getUsersCount,
-    profilePhotoUpload
+    profilePhotoUpload,
+    profilePhotodelete
     
 }

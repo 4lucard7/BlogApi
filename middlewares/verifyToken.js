@@ -30,6 +30,17 @@ function verfiyTokenAndAdmin(req, res, next) {
     });
 }
 
+// verify token and Authorization
+function verfiyTokenAndAuthorization(req, res, next) {
+    verfiyToken(req, res, () => {
+        if (req.user.id === req.params.id || req.user.isAdmin) {
+            next();
+        } else {
+            return res.status(403).json({ message: "not allowed only user himself or admin"});
+        }
+    });
+}
+
 // verify token and only user himself
 function verfiyTokenAndOnlyUser(req, res, next) {
     verfiyToken(req, res, () => {
@@ -44,5 +55,6 @@ function verfiyTokenAndOnlyUser(req, res, next) {
 module.exports = {
     verfiyToken,
     verfiyTokenAndAdmin,
-    verfiyTokenAndOnlyUser
+    verfiyTokenAndOnlyUser,
+    verfiyTokenAndAuthorization
 };
