@@ -1,16 +1,14 @@
 const mongoose = require("mongoose");
 const Joi = require("joi");
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
 
-
-//User Schema
 const UserSchema = new mongoose.Schema({
     username: {
         type: String,
         required: true,
         trim: true,
         minlength: 2,
-        maxlength: 100
+        maxlength: 100,
     },
     email: {
         type: String,
@@ -18,96 +16,81 @@ const UserSchema = new mongoose.Schema({
         trim: true,
         minlength: 5,
         maxlength: 100,
-        unique: true
+        unique: true,
     },
     password: {
         type: String,
         required: true,
         trim: true,
-        minlength: 8
+        minlength: 8,
     },
     profilePhoto: {
-        url: {
-            type: String,
-            default: "https://media.istockphoto.com/id/476085198/photo/businessman-silhouette-as-avatar-or-default-profile-picture.jpg"
-        },
-        publicId: {
-            type: String,
-            default: null
+        type: Object,
+        default: {
+            url: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png",
+            publicId: null,
         }
     },
     bio: {
         type: String,
-        maxlength: 500
     },
     isAdmin: {
         type: Boolean,
-        default: false
+        default: false,
     },
     isAccountVerified: {
         type: Boolean,
-        default: false
-    }
+        default: false,
+    },
 }, {
-    timestamps: true
+    timestamps: true,
 });
 
+// Generate Auth Token - CRITICAL: Include isAdmin in the payload
+UserSchema.methods.generateAuthToken = function() {
+    return jwt.sign(
+        { 
+            id: this._id, 
+            isAdmin: this.isAdmin  // <-- Make sure this is included!
+        }, 
+        process.env.JWT_SECRET
+    );
+};
 
+const User = mongoose.model("User", UserSchema);
 
-//validation Sign up USer
+// Validate Signup User
 function validateSignupUser(obj) {
     const schema = Joi.object({
-        username: Joi.string().min(2).max(100).required(),
-        email: Joi.string().email().min(5).max(100).required(),
-        password: Joi.string().min(8).required(),
-        bio: Joi.string().max(500)
+        username: Joi.string().trim().min(2).max(100).required(),
+        email: Joi.string().trim().min(5).max(100).required().email(),
+        password: Joi.string().trim().min(8).required(),
     });
-
     return schema.validate(obj);
 }
 
-//validation login USer
+// Validate Login User
 function validateLoginUser(obj) {
     const schema = Joi.object({
-        email: Joi.string().email().min(5).max(100).required(),
-        password: Joi.string().min(8).required(),
+        email: Joi.string().trim().min(5).max(100).required().email(),
+        password: Joi.string().trim().min(8).required(),
     });
-
     return schema.validate(obj);
 }
 
-//validation Update USer
+// Validate Update User
 function validateUpdateUser(obj) {
     const schema = Joi.object({
-        username: Joi.string().min(2).max(100).required(),
-        password: Joi.string().min(8).required(),
-        bio: Joi.string().max(500)
+        username: Joi.string().trim().min(2).max(100),
+        password: Joi.string().trim().min(8),
+        bio: Joi.string(),
     });
-
     return schema.validate(obj);
 }
-
-//generate token
-
-UserSchema.methods.generateAuthToken = function() {
-    return jwt.sign({id : this._id, isAdmin : this.isAdmin}, process.env.SECRET_KEY)
-}
-
-
-
-
-
-
-
-
-
-
-//User model
-const User = mongoose.model("User", UserSchema);
 
 module.exports = {
     User,
     validateSignupUser,
     validateLoginUser,
-    validateUpdateUser
-}
+    validateUpdateUser,
+};
