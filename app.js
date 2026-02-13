@@ -1,6 +1,7 @@
 const express =require("express");
 const connectDb = require("./config/connectDb")
 require("dotenv").config()
+
 //INIT app
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use("/api/auth", require("./routes/auth"))
 app.use("/api/users", require("./routes/user"))
 app.use("/api/posts", require("./routes/post"))
+app.use("/api/comments", require("./routes/comment"))
 
 
 

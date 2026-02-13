@@ -44,6 +44,15 @@ const UserSchema = new mongoose.Schema({
     },
 }, {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+});
+
+//populate user posts
+UserSchema.virtual("posts", {
+    ref: "Post",
+    localField: "_id",
+    foreignField: "user"
 });
 
 // Generate Auth Token - CRITICAL: Include isAdmin in the payload
@@ -93,4 +102,4 @@ module.exports = {
     validateSignupUser,
     validateLoginUser,
     validateUpdateUser,
-};
+}
