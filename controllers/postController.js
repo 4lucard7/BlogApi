@@ -4,6 +4,7 @@ const path = require("path");
 const { cloudinaryUploadImage, cloudinaryDeleteImage } = require("../utils/cloudinary");
 const fs = require("fs");
 const { validateCreatePost, Post, validateUpdatePost } = require("../models/Post");
+const Comment = require("../models/Comment");
 
 
 
@@ -78,13 +79,15 @@ const getAllPost = asyncHandler(async(req, res) => {
 })
 
 /** 
- * @description get byid post
+ * @description get Single post
  * @route /api/posts/:id
  * @method get
  * @access private (only logged in  user)
  */
 const getSinglePost = asyncHandler(async(req, res) => {
-    const post = await Post.findById(req.params.id).populate("user",["-passsword"]);
+    const post = await Post.findById(req.params.id)
+    .populate("user",["-passsword"])
+    .populate("comments");
 
     if(!post){
         return res.status(404).json({ message : "post not found"})
@@ -121,7 +124,10 @@ const getDeletePost = asyncHandler(async(req, res) => {
     if(req.user.id || req.user.isAdmin === post.user.toString()){
         await Post.findByIdAndDelete(req.params.id);
         await cloudinaryDeleteImage(post.image.publicId);
-        //TODO delete all comments from the post
+
+        //delete all comments from the post
+        await Comment.deleteMany({postId : req.params.id})
+
         return res.status(200).json({message : "post deleted successfully"})
     }else{
         return res.status(403).json({message : "not allowed only admin or post owner"})

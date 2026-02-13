@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const Joi = require("joi");
-const jwt = require("jsonwebtoken");
 
 
 
@@ -44,7 +43,20 @@ const PostSchema = new mongoose.Schema({
             ref : "User"
         }
     ],
-}, {timeseries : true})
+}, {
+    timeseries : true,
+    toJSON : {virtuals : true},
+    toObject : {virtuals : true}
+    }
+)
+
+//virtual populate comments
+PostSchema.virtual("comments", {
+    ref : "Comment",
+    localField : "_id",
+    foreignField : "postId",
+    justOne : false
+    })
 
 //validation create USer
 function validateCreatePost(obj) {
