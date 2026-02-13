@@ -18,6 +18,13 @@ app.use("/api/auth", require("./routes/auth"))
 app.use("/api/users", require("./routes/user"))
 app.use("/api/posts", require("./routes/post"))
 app.use("/api/comments", require("./routes/comment"))
+app.use("/api/categories", require("./routes/category"))
+
+
+
+//error handling middleware
+app.use(require("./middlewares/error").notFound);
+app.use(require("./middlewares/error").errorHandler);
 
 
 

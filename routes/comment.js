@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { createComment, updateComment, deleteComment } = require('../controllers/commentController');
+const { createComment, updateComment, deleteComment, getAllComments } = require('../controllers/commentController');
 const validationObjectId = require('../middlewares/validationObjectId');
 const { verfiyToken, verfiyTokenAndAdmin } = require('../middlewares/verifyToken');
 
